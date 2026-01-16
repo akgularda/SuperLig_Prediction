@@ -139,6 +139,8 @@ footer {
   font-size: 0.7rem;
   cursor: pointer;
   box-shadow: 0 12px 24px rgba(11, 77, 162, 0.25);
+  display: inline-block;
+  text-decoration: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -197,6 +199,10 @@ footer {
   font-weight: 600;
   cursor: pointer;
   border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
