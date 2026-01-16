@@ -104,3 +104,24 @@ The scheduled workflow generates JSON endpoints you can treat as an API:
 - `/api/forecast.json` - full table with probabilities
 - `/api/teams.json` - team metadata and key signings
 - `/data/latest.json` - full payload (metadata + teams + predictions)
+
+## Local Python App (Detailed)
+
+The local app explains how probabilities are calculated, step by step, and
+keeps the dataset refreshed automatically.
+
+### Install
+```bash
+pip install -r app_requirements.txt
+```
+
+### Run
+```bash
+python -m streamlit run superlig_local_app.py
+```
+
+Or on Windows: double-click `Start_Local_App.bat`.
+
+### Data updates
+The app downloads the latest dataset from GitHub and shows the daily published
+forecast from GitHub Pages.
