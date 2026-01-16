@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.log
+*.aux
+*.out
+*.tmp
+*.bak
+*.swp
+.DS_Store
+Thumbs.db
+site/data/*.json
+site/api/*.json
+data_driven_superlig_prediction_*.json
+enhanced_superlig_predictions_*.json

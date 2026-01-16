@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Super Lig Intelligence - Automated 2025-26 Forecasts</title>
+    <meta
+      name="description"
+      content="Automated Super Lig forecasts, player signal tracking, and commercial licensing for clubs and media."
+    />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Spectral:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-one"></div>
+    <div class="bg-orb orb-two"></div>
+    <header class="hero" id="top">
+      <nav class="nav">
+        <div class="brand">Super Lig Intelligence</div>
+        <div class="nav-links">
+          <a href="#forecast">Forecast</a>
+          <a href="#teams">Teams</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#licensing">Licensing</a>
+        </div>
+        <button class="nav-cta">Get Report</button>
+      </nav>
+      <div class="hero-grid">
+        <div class="hero-text reveal" style="--delay: 0.1s;">
+          <p class="eyebrow">2025-26 automation ready</p>
+          <h1 class="headline">
+            Commercial-grade Super Lig forecasts with live player signals.
+          </h1>
+          <p class="subhead">
+            Data-driven simulations update automatically, powered by 60+ years of match history.
+            Publish on GitHub Pages without manual edits.
+          </p>
+          <div class="hero-actions">
+            <button class="primary-cta">Start Free Trial</button>
+            <button class="secondary-cta">Book a Demo</button>
+          </div>
+          <div class="hero-meta">
+            <div>
+              <span class="meta-label">Last update</span>
+              <span id="last-updated" class="meta-value">--</span>
+            </div>
+            <div>
+              <span class="meta-label">Simulations</span>
+              <span id="simulations" class="meta-value">--</span>
+            </div>
+            <div>
+              <span class="meta-label">Historical range</span>
+              <span id="historical-range" class="meta-value">--</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-panel reveal" style="--delay: 0.25s;">
+          <div class="panel-header">
+            <span>Predicted champion</span>
+            <span class="panel-badge">Daily</span>
+          </div>
+          <div class="champion-highlight">
+            <h2 id="champion-team">--</h2>
+            <p id="champion-prob">--</p>
+            <div id="champion-meta" class="champion-meta"></div>
+          </div>
+          <div class="panel-subheader">Top contenders</div>
+          <div id="contenders-list" class="contenders-list"></div>
+          <div class="panel-footer">
+            <span>API: /api/champion.json</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="forecast" class="section">
+        <div class="section-header">
+          <h2>Forecast table</h2>
+          <p>Ranked projections with championship, European, and relegation probabilities.</p>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Team</th>
+                <th>Pts</th>
+                <th>Champ%</th>
+                <th>Europe%</th>
+                <th>Releg%</th>
+              </tr>
+            </thead>
+            <tbody id="forecast-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="teams" class="section">
+        <div class="section-header">
+          <h2>Team intelligence</h2>
+          <p>Market value, managers, and stadium reach for the top forecasted clubs.</p>
+        </div>
+        <div id="team-cards" class="team-grid"></div>
+      </section>
+
+      <section id="players" class="section">
+        <div class="section-header">
+          <h2>Player radar</h2>
+          <p>Key signings and impact talent, updated with each automated run.</p>
+        </div>
+        <div id="player-radar" class="player-grid"></div>
+      </section>
+
+      <section class="section feature-band">
+        <div class="feature-card">
+          <h3>Commercial insights</h3>
+          <p>Automated forecasts packaged for clubs, agencies, and broadcasters.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Scenario engine</h3>
+          <p>Run millions of simulations without touching the dashboard config.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Shareable assets</h3>
+          <p>Export tables, pricing sheets, and partner-ready summaries.</p>
+        </div>
+      </section>
+
+      <section id="pricing" class="section pricing">
+        <div class="section-header">
+          <h2>Pricing built for commercial rollouts</h2>
+          <p>Choose a plan that scales from fans to full licensing.</p>
+        </div>
+        <div class="pricing-grid">
+          <div class="pricing-card">
+            <h3>Starter</h3>
+            <p class="price">EUR 49 / mo</p>
+            <ul>
+              <li>Weekly forecast updates</li>
+              <li>Top 6 contender board</li>
+              <li>Shareable weekly report</li>
+            </ul>
+            <button class="secondary-cta">Start Starter</button>
+          </div>
+          <div class="pricing-card featured">
+            <div class="badge">Most popular</div>
+            <h3>Pro</h3>
+            <p class="price">EUR 199 / mo</p>
+            <ul>
+              <li>Daily automation</li>
+              <li>Player radar and transfer signals</li>
+              <li>Commercial sponsor kit</li>
+            </ul>
+            <button class="primary-cta">Start Pro</button>
+          </div>
+          <div class="pricing-card">
+            <h3>Club</h3>
+            <p class="price">Custom</p>
+            <ul>
+              <li>Private forecast workspace</li>
+              <li>API + licensing rights</li>
+              <li>Dedicated analyst support</li>
+            </ul>
+            <button class="secondary-cta">Contact Sales</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="licensing" class="section licensing">
+        <div class="section-header">
+          <h2>Commercial licensing</h2>
+          <p>Package Super Lig intelligence for media, sportsbooks, and partner ecosystems.</p>
+        </div>
+        <div class="licensing-grid">
+          <div class="licensing-card">
+            <h3>Media bundle</h3>
+            <p>Broadcast-ready visuals, weekly insights, and branded slides.</p>
+          </div>
+          <div class="licensing-card">
+            <h3>Club analytics</h3>
+            <p>Scenario planning, scouting snapshots, and transfer impact sheets.</p>
+          </div>
+          <div class="licensing-card">
+            <h3>Data API</h3>
+            <p>Automated JSON delivery for web apps and partner integrations.</p>
+          </div>
+        </div>
+        <div class="cta-strip">
+          <div>
+            <h3>Ready to commercialize your forecast?</h3>
+            <p>Get licensing terms and implementation support.</p>
+          </div>
+          <button class="primary-cta">Request licensing pack</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>
+        <div class="brand">Super Lig Intelligence</div>
+        <p>Automated forecasts and commercial analytics, updated daily.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#top">Overview</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#licensing">Licensing</a>
+        <a href="mailto:sales@superligintel.com">Contact</a>
+      </div>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
