@@ -25,6 +25,7 @@
         <div class="brand">Super Lig Intelligence</div>
         <div class="nav-links">
           <a href="#forecast">Forecast</a>
+          <a href="#methodology">Method</a>
           <a href="#teams">Teams</a>
           <a href="#pricing">Pricing</a>
           <a href="#licensing">Licensing</a>
@@ -99,6 +100,88 @@
             </thead>
             <tbody id="forecast-table"></tbody>
           </table>
+        </div>
+      </section>
+
+      <section id="methodology" class="section methodology">
+        <div class="section-header">
+          <h2>How the forecast is calculated</h2>
+          <p>Transparent pipeline from historical matches to daily championship odds.</p>
+        </div>
+        <div class="method-grid">
+          <div class="method-card">
+            <h3>Model pipeline</h3>
+            <ol class="method-steps">
+              <li>Ingest `tsl_dataset.csv` with match results from 1958-2020.</li>
+              <li>Calculate team baselines: win rate, goals, home edge, recent form, big match results.</li>
+              <li>Blend in current season inputs like market value, managers, and transfer spend.</li>
+              <li>Simulate the full season with Monte Carlo match outcomes using Poisson scoring.</li>
+              <li>Aggregate thousands of seasons into points, title odds, Europe, and relegation rates.</li>
+            </ol>
+            <div class="method-metrics">
+              <div>
+                <span class="meta-label">Historical matches</span>
+                <span id="method-matches" class="meta-value">--</span>
+              </div>
+              <div>
+                <span class="meta-label">Historical range</span>
+                <span id="method-range" class="meta-value">--</span>
+              </div>
+              <div>
+                <span class="meta-label">Simulations</span>
+                <span id="method-sims" class="meta-value">--</span>
+              </div>
+              <div>
+                <span class="meta-label">Teams modeled</span>
+                <span id="method-teams" class="meta-value">--</span>
+              </div>
+            </div>
+            <div class="method-links">
+              <a href="https://github.com/akgularda/SuperLig_Prediction/blob/main/data_driven_predictor_2025_26.py">
+                View model code
+              </a>
+              <a href="https://github.com/akgularda/SuperLig_Prediction/blob/main/tsl_dataset.csv">
+                View dataset
+              </a>
+            </div>
+          </div>
+          <div class="method-card simulator">
+            <div class="sim-header">
+              <h3>Live simulation preview</h3>
+              <p>Client-side Monte Carlo sampler using the current title probabilities.</p>
+            </div>
+            <div class="sim-controls">
+              <button id="sim-run" class="primary-cta" data-iterations="10000">
+                Run 10,000 sims
+              </button>
+              <button id="sim-reset" class="secondary-cta">Reset</button>
+            </div>
+            <div class="sim-stats">
+              <div>
+                <span class="meta-label">Iterations</span>
+                <span id="sim-iterations" class="meta-value">0</span>
+              </div>
+              <div>
+                <span class="meta-label">Leader</span>
+                <span id="sim-leader" class="meta-value">--</span>
+              </div>
+              <div>
+                <span class="meta-label">Elapsed</span>
+                <span id="sim-elapsed" class="meta-value">0.0s</span>
+              </div>
+            </div>
+            <div class="sim-table">
+              <div class="sim-row sim-head">
+                <span>Team</span>
+                <span>Wins</span>
+                <span>Share</span>
+              </div>
+              <div id="sim-results"></div>
+            </div>
+            <p class="sim-footnote">
+              This is a fast preview in your browser; the daily job runs the full match engine.
+            </p>
+          </div>
         </div>
       </section>
 

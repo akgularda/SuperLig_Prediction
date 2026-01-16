@@ -22,6 +22,8 @@ const formatPercent = (value) => {
   return `${formatNumber(value, 1)}%`;
 };
 
+const formatDuration = (milliseconds) => `${(milliseconds / 1000).toFixed(1)}s`;
+
 const safeText = (value) => (value ? String(value) : "--");
 
 const createTag = (text) => {
@@ -190,6 +192,197 @@ const applyMetadata = (metadata) => {
   }
 };
 
+const renderMethodMetrics = (metadata) => {
+  const matches = document.getElementById("method-matches");
+  const range = document.getElementById("method-range");
+  const sims = document.getElementById("method-sims");
+  const teams = document.getElementById("method-teams");
+
+  if (!metadata) {
+    return;
+  }
+
+  if (matches) {
+    matches.textContent = formatInteger(metadata.historical_matches);
+  }
+  if (range) {
+    range.textContent = metadata.historical_range || "--";
+  }
+  if (sims) {
+    sims.textContent = formatInteger(metadata.simulations);
+  }
+  if (teams) {
+    teams.textContent = formatInteger(metadata.teams_total);
+  }
+};
+
+const simState = {
+  initialized: false,
+  running: false,
+  table: [],
+  counts: {},
+  done: 0,
+  target: 0,
+  start: 0,
+};
+
+const buildSampler = (table) => {
+  const entries = table.map((row) => ({
+    team: row.team,
+    weight: Math.max(0, Number(row.championship_probability) || 0),
+  }));
+  let total = entries.reduce((sum, entry) => sum + entry.weight, 0);
+  if (total <= 0) {
+    entries.forEach((entry) => {
+      entry.weight = 1;
+    });
+    total = entries.length;
+  }
+
+  const cumulative = [];
+  let running = 0;
+  entries.forEach((entry) => {
+    running += entry.weight;
+    cumulative.push({ team: entry.team, threshold: running });
+  });
+
+  return () => {
+    const roll = Math.random() * total;
+    for (let i = 0; i < cumulative.length; i += 1) {
+      if (roll <= cumulative[i].threshold) {
+        return cumulative[i].team;
+      }
+    }
+    return cumulative[cumulative.length - 1]?.team || "--";
+  };
+};
+
+const updateSimulationUI = () => {
+  const iterationsEl = document.getElementById("sim-iterations");
+  const leaderEl = document.getElementById("sim-leader");
+  const elapsedEl = document.getElementById("sim-elapsed");
+  const resultsEl = document.getElementById("sim-results");
+
+  if (!iterationsEl || !leaderEl || !elapsedEl || !resultsEl) {
+    return;
+  }
+
+  const total = simState.done;
+  const elapsed = simState.start ? performance.now() - simState.start : 0;
+  const iterationsText = simState.target
+    ? `${formatInteger(total)} / ${formatInteger(simState.target)}`
+    : formatInteger(total);
+  iterationsEl.textContent = iterationsText;
+  elapsedEl.textContent = formatDuration(elapsed);
+
+  const entries = Object.entries(simState.counts).map(([team, count]) => ({
+    team,
+    count,
+    share: total ? (count / total) * 100 : 0,
+  }));
+  entries.sort((a, b) => b.count - a.count);
+
+  if (entries.length > 0) {
+    leaderEl.textContent = `${entries[0].team} (${formatPercent(entries[0].share)})`;
+  } else {
+    leaderEl.textContent = "--";
+  }
+
+  resultsEl.innerHTML = "";
+  if (!total) {
+    const row = document.createElement("div");
+    row.className = "sim-row";
+    row.innerHTML = "<span>No runs yet</span><span>--</span><span>--</span>";
+    resultsEl.appendChild(row);
+    return;
+  }
+
+  entries.slice(0, 6).forEach((entry) => {
+    const row = document.createElement("div");
+    row.className = "sim-row";
+    row.innerHTML = `
+      <span>${entry.team}</span>
+      <span>${formatInteger(entry.count)}</span>
+      <span>${formatPercent(entry.share)}</span>
+    `;
+    resultsEl.appendChild(row);
+  });
+};
+
+const initLiveSimulation = (table) => {
+  const runButton = document.getElementById("sim-run");
+  const resetButton = document.getElementById("sim-reset");
+  if (!runButton || !resetButton) {
+    return;
+  }
+
+  simState.table = table || [];
+  if (simState.initialized) {
+    return;
+  }
+  simState.initialized = true;
+  updateSimulationUI();
+
+  const resetSimulation = () => {
+    simState.running = false;
+    simState.counts = {};
+    simState.done = 0;
+    simState.target = 0;
+    simState.start = 0;
+    runButton.disabled = false;
+    resetButton.disabled = false;
+    updateSimulationUI();
+  };
+
+  const runSimulation = (iterations) => {
+    if (simState.running || simState.table.length === 0) {
+      return;
+    }
+    simState.running = true;
+    simState.counts = {};
+    simState.done = 0;
+    simState.target = iterations;
+    simState.start = performance.now();
+    runButton.disabled = true;
+    resetButton.disabled = true;
+
+    const sample = buildSampler(simState.table);
+    const chunkSize = 250;
+
+    const runChunk = () => {
+      const remaining = simState.target - simState.done;
+      const batch = Math.min(chunkSize, remaining);
+      for (let i = 0; i < batch; i += 1) {
+        const team = sample();
+        simState.counts[team] = (simState.counts[team] || 0) + 1;
+      }
+      simState.done += batch;
+      updateSimulationUI();
+
+      if (simState.done < simState.target) {
+        requestAnimationFrame(runChunk);
+      } else {
+        simState.running = false;
+        runButton.disabled = false;
+        resetButton.disabled = false;
+        updateSimulationUI();
+      }
+    };
+
+    requestAnimationFrame(runChunk);
+  };
+
+  runButton.addEventListener("click", () => {
+    const iterations = Number.parseInt(runButton.dataset.iterations, 10) || 10000;
+    runSimulation(iterations);
+  });
+  resetButton.addEventListener("click", () => {
+    if (!simState.running) {
+      resetSimulation();
+    }
+  });
+};
+
 const loadData = async () => {
   const response = await fetch(`data/latest.json?ts=${Date.now()}`);
   if (!response.ok) {
@@ -205,11 +398,13 @@ const render = async () => {
     const teams = payload?.teams || {};
 
     applyMetadata(payload?.metadata);
+    renderMethodMetrics(payload?.metadata);
     renderChampion(table, teams);
     renderContenders(table);
     renderTable(table);
     renderTeamCards(table, teams);
     renderPlayerRadar(table, teams);
+    initLiveSimulation(table);
   } catch (error) {
     const fallback = document.getElementById("forecast-table");
     if (fallback) {
