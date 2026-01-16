@@ -11,6 +11,7 @@ Key Features:
 - ✅ Performance trend analysis
 """
 
+import argparse
 import pandas as pd
 import numpy as np
 import random
@@ -659,6 +660,59 @@ class DataDrivenSuperLigPredictor:
         
         return standings
 
+    def _pick_champion(self, standings: dict) -> str:
+        """Return champion based on points, goal difference, goals for."""
+        ranked = sorted(
+            standings.items(),
+            key=lambda item: (
+                item[1]['Pts'],
+                item[1]['GF'] - item[1]['GA'],
+                item[1]['GF'],
+            ),
+            reverse=True,
+        )
+        return ranked[0][0]
+
+    def run_champion_simulations(self, simulations: int) -> dict:
+        """Run Monte Carlo simulations focused on champion outcomes."""
+        if simulations <= 0:
+            raise ValueError("simulations must be positive")
+        champion_counts = defaultdict(int)
+        progress_every = max(1, simulations // 20)
+        for i in range(simulations):
+            if (i + 1) % progress_every == 0 or i == 0:
+                print(f"Progress: {i + 1}/{simulations} simulations")
+            standings = self.simulate_season()
+            champion = self._pick_champion(standings)
+            champion_counts[champion] += 1
+
+        champion_probs = {
+            team: (count / simulations) * 100 for team, count in champion_counts.items()
+        }
+        winner = max(champion_counts.items(), key=lambda item: item[1])[0]
+        return {
+            "winner": winner,
+            "simulations": simulations,
+            "champion_counts": champion_counts,
+            "champion_probabilities": champion_probs,
+        }
+
+    def display_champion_summary(self, summary: dict) -> None:
+        """Print champion-only summary."""
+        simulations = summary.get("simulations", 0)
+        winner = summary.get("winner", "")
+        print("\nMonte Carlo champion forecast")
+        print("-" * 40)
+        print(f"Simulations: {simulations}")
+        print(f"Top winner: {winner}")
+        ranked = sorted(
+            summary.get("champion_probabilities", {}).items(),
+            key=lambda item: item[1],
+            reverse=True,
+        )
+        for team, prob in ranked[:6]:
+            print(f"{team:<15}: {prob:>5.2f}%")
+
     def run_data_driven_simulations(self):
         """Run comprehensive simulations"""
         print(f"\n🚀 Starting Data-Driven 2025-26 Season Simulation")
@@ -994,17 +1048,47 @@ class DataDrivenSuperLigPredictor:
             print(f"• {k}: {v}")
         return summary
 
+def _configure_console() -> None:
+    """Best-effort UTF-8 console to avoid encoding errors on Windows."""
+    try:
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8")
+        if hasattr(sys.stderr, "reconfigure"):
+            sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
+
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Data-driven Super Lig predictor")
+    parser.add_argument(
+        "--simulations",
+        type=int,
+        default=int(os.getenv("SIMULATIONS", "1000")),
+        help="Number of Monte Carlo simulations",
+    )
+    parser.add_argument("--backtest", type=int, default=None, help="Season to backtest")
+    parser.add_argument(
+        "--champion-only",
+        action="store_true",
+        help="Only simulate champion outcomes (fast summary)",
+    )
+    parser.add_argument("--seed", type=int, default=None, help="Random seed")
+    return parser.parse_args()
+
+
 def main():
     """Main function to run data-driven prediction"""
+    _configure_console()
+    args = _parse_args()
     predictor = DataDrivenSuperLigPredictor("tsl_dataset.csv")
 
+    if args.seed is not None:
+        random.seed(args.seed)
+        np.random.seed(args.seed)
+
     # Optional: backtest via CLI or env var, e.g., `--backtest 2019`
-    season_to_backtest = None
-    if len(sys.argv) >= 3 and sys.argv[1] == "--backtest":
-        try:
-            season_to_backtest = int(sys.argv[2])
-        except ValueError:
-            season_to_backtest = None
+    season_to_backtest = args.backtest
     if season_to_backtest is None:
         env_val = os.getenv('BACKTEST_SEASON')
         if env_val:
@@ -1017,6 +1101,12 @@ def main():
         predictor.backtest_season(season_to_backtest, simulations=200)
         return
 
+    if args.champion_only:
+        summary = predictor.run_champion_simulations(args.simulations)
+        predictor.display_champion_summary(summary)
+        return summary
+
+    predictor.simulations = args.simulations
     predictor.run_data_driven_simulations()
     results = predictor.display_comprehensive_results()
     
